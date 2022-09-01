@@ -36,26 +36,13 @@ Hello prospective candidate! In this repo, you're given a boilerplate applicatio
 
 3. Now that you're adding your new markers and saving them, let's make some shapes! Using the Mapbox-gl-draw library, let's make a polygon. Here's the user story:
 
-      ```When I click on a marker, it's location will be used as a point for a polygon. Successive clicks will add markers to the polygon, and clicking a point will remove it from the polygon```
-
-      Here's an example in pictures:
-
-      After 2 Clicks:
-
-      ![2 Clicks](./click2.png)
-
-      After 3 Clicks:
-
-      ![3 Clicks](./click3.png)
-
-      After clicking on "Boston"
-
-      ![Unclick](./unclick.png)
+      ```When I use the draw tool to make a polygon, I want to be able to save it and have it persist and load on refresh.```
 
       Notes:
 
       - It is important that these polygons persist.
-      - Use the React-Leaflet library to draw your polygon.
+      - Use the Mapbox-gl-draw library to draw your polygon.
+      - Geojson format knowledge will help.
 
 
 4. BONUS TIME!
@@ -63,7 +50,7 @@ Hello prospective candidate! In this repo, you're given a boilerplate applicatio
     If you have some extra time, feel free to implement any of the following. No stress.
     - Tests are always appreciated. See what you can do here.
     - Host your application. Heroku is free and easy. That being said, use whatever you are comfortable with.
-    - Add some other fun features with the React-Leaflet library. Be creative!
+    - Add some other fun features with the Maplibre and Mapbox-draw-gl libraries. Be creative!
 
 ### Intructions
 
