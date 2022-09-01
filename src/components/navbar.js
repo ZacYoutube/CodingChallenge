@@ -5,7 +5,7 @@ export default function Navbar(){
 
   return (
     <div className="heading">
-      <h1>This is my map App</h1>
+      <h1>Concept3D Map Challenge</h1>
     </div>
   );
 }

@@ -1,108 +1,98 @@
-# MapLibre GL JS map using React JS
+# Concept3D Interview : The Technical Challenge
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+### Overview
 
-Quick way to star a web map application with MapLibre GL JS using Create React App.
+Hello prospective candidate! In this repo, you're given a boilerplate application that contains most of the libraries you'll need to complete the challenge. It's intended to examine your abilities in the following areas:
 
-A simple fullscreen map application as an example on how to use MapTiler maps together with React and MapLibre GL JS for your own React app.
+2. React/Redux knowledge
+4. General self-ownership of code in order to solve a problem
+5. Comfort diving into the docs in order to learn new technologies
+5. Ability to write clean, well organized, and refactored code
+6. Git usage and best practices
 
-## Screenshot
+### Requirements
 
-![react maplibre template](/assets/react-maplibre-template.png "React Maplibre template")
+1. This boilerplate effectively contains two applications: A React Redux application that has been bootstrapped with Create React App, and an Express API. You'll notice that, at the moment, the API uses app.locals as a data store.
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+    ```When I navigate to the root path of the applicaiton, I see the three seeded markers displayed on the page.```
 
-## Step-by-step tutorial - How to display a map in React JS using MapLibre GL JS
+    Notes:
+    - Update the application to fetch the three locations from the api and place them on the map as markers
 
-Documentation: [How to display a map in React JS using MapLibre GL JS](https://documentation.maptiler.com/hc/en-us/articles/4405444890897-how-to-display-maplibre-gl-js-map-using-react-js?utm_medium=referral&utm_source=github&utm_campaign=2022-05%20%7C%20js%20frameworks%20%7C%20react)
 
-## Demo
+2. As you'll see when you look into the Front-End boilerplate, its pretty simple. Cerate and add a form to the Map. The form will be used to add new markers to the map. The basic form should have fields for inputting name, latitude and longitude. This part has two aspects - client side and server side. The user story is:
 
-Online demo: https://labs.maptiler.com/cra-template-maplibre-gl-js/
+    ```When I enter a valid latitude and longitude into the form with a name, and then press enter, I will see a new marker added to the map. If there are errors, I will see them rendered on screen. On success, the map will pan to the new marker's coordinates.```
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+    Notes:
 
-## Build With
+    - Markers must persist.
+    - **Valid** latitude and longitude is important. As is the existence of a name.
+    - Verify lat, lng, and name server-side.
+    - Return meaningful error messages to the Front-End and render them accordingly.
+    - Use Redux and Reducers to update the state of your app.
+    - When adding a new marker, the center of the map will be set to the `[lat, lng]` of the new marker.
 
-* [React.js](https://reactjs.org/)
-* [MapLibre GL JS](https://maplibre.org/)
-* [MapTiler](https://www.maptiler.com/)
 
-## Getting Started
+3. Now that you're adding your new markers and saving them, let's make some shapes! Using the Mapbox-gl-draw library, let's make a polygon. Here's the user story:
 
-### Prerequisites
+      ```When I click on a marker, it's location will be used as a point for a polygon. Successive clicks will add markers to the polygon, and clicking a point will remove it from the polygon```
 
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+      Here's an example in pictures:
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+      After 2 Clicks:
 
-### Create an app
+      ![2 Clicks](./click2.png)
 
-To create a new react project run in your command-line:
+      After 3 Clicks:
 
-```
-  npx create-react-app my-react-map --template @maptiler/cra-template-maplibre-gl-js
-```
+      ![3 Clicks](./click3.png)
 
-Navigate to the newly created project folder **my-react-map**
+      After clicking on "Boston"
 
-```
-  cd my-react-map
-```
+      ![Unclick](./unclick.png)
 
-### API KEY
+      Notes:
 
-Rename or copy the `.env.example` file to `.env`
+      - It is important that these polygons persist.
+      - Use the React-Leaflet library to draw your polygon.
 
-```
-  cp .env.example .env
-```
 
-Open the `.env` file, :warning: you will need to replace **YOUR_MAPTILER_API_KEY** with your own MapTiler API key.
+4. BONUS TIME!
 
-Your MapTiler account access key is on your MapTiler [Cloud](https://cloud.maptiler.com/account/keys/) account page. 
+    If you have some extra time, feel free to implement any of the following. No stress.
+    - Tests are always appreciated. See what you can do here.
+    - Host your application. Heroku is free and easy. That being said, use whatever you are comfortable with.
+    - Add some other fun features with the React-Leaflet library. Be creative!
 
-:information_source: If you don't have an API KEY you can create it for free at https://www.maptiler.com/cloud/
+### Intructions
 
-### Run
+1. Clone this repo to your own machine. (Do not fork it)
+2. `cd c3d-challenge`
+3. Delete the .git directory.
+4. Initialize git. Host this project as a new repo on your own Github profile.
+5. `npm install`
+6. Open a separate terminal tab and run `npm run dev` (this will start your server)
+7. `npm start` (this will start the React application)
+8. Good luck!
 
-To start your local environment run: 
+**We rely heavily upon Git. Be sure to checkout new branches for new features. Commit often.**
 
-```
-  npm start
-``` 
+This project was made with Create-React-App and Nodemon, so it supports hot-reloading anytime you make a change (both client side and server side)!
 
-You will find your app on address http://localhost:3000/.
+### Helpful Links:
 
-Now you should see the app in your browser.
+- [Express](https://expressjs.com/)
+- [AWS Docs](https://docs.aws.amazon.com/)
+- [DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html)
+- [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html)
+- [Maplibre](https://maplibre.org/)
+- [React Redux](https://react-redux.js.org/introduction/getting-started)
+- [Redux](http://redux.js.org/)
 
-### Build
 
-To build for production, run: 
-```
-  npm run build
-``` 
+### Final notes:
 
-### gh-pages
+Take as long as you need to feel to do your best work. However, this challenge should realistically take no longer than approximately 5-6 hours.
 
-To deploy the app to the gh-pages branch, run:
-```
-  npm run deploy
-```
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-Instead of using or developing a custom map component you can use the [reac-map-gl component](http://visgl.github.io/react-map-gl/docs/get-started/get-started#using-with-a-mapbox-gl-fork)
+Have fun!
