@@ -71,7 +71,7 @@ Hello prospective candidate! In this repo, you're given a boilerplate applicatio
     - Tests are always appreciated. See what you can do here.
     - Host your application. Heroku is free and easy. That being said, use whatever you are comfortable with.
     - Add some other fun features with the Maplibre and Mapbox-draw-gl libraries. Be creative!
-    - Check for accessible markdown.
+    - Check for accessible markup.
 
 ### Helpful Links:
 
