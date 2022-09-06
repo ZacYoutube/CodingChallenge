@@ -28,7 +28,7 @@ Hello prospective candidate! In this repo, you're given a boilerplate applicatio
 
 1. This boilerplate effectively contains two applications: A React Redux application that has been bootstrapped with Create React App, and an Express API. You'll notice that, at the moment, the API uses `app.locals` as a data store.
 
-    "When I navigate to the root path of the applicaiton, I see the three seeded markers displayed on the page."
+    "When I navigate to the root path of the application, I see the three seeded markers displayed on the page."
   
     ---
     Notes:
