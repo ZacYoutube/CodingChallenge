@@ -51,8 +51,11 @@ Hello prospective candidate! In this repo, you're given a boilerplate applicatio
     - When adding a new marker, the center of the map will be set to the `[lat, lng]` of the new marker.
     ---
 
+BONUS TIME!
 
-3. Now that you're adding your new markers and saving them, let's make some shapes! Using the `mapbox-gl-draw` library, let's make a polygon. Here's the user story:
+If you have some extra time, feel free to implement any of the following. No stress.
+
+Now that you're adding your new markers and saving them, let's make some shapes! Using the `mapbox-gl-draw` library, let's make a polygon. Here's the user story:
 
       "When I use the draw tool to make a polygon, I want to be able to save it and have it persist and load on refresh."
 
@@ -64,10 +67,8 @@ Hello prospective candidate! In this repo, you're given a boilerplate applicatio
       - Geojson format knowledge will help.
       ---
 
+Other Bonus Options:
 
-4. BONUS TIME!
-
-    If you have some extra time, feel free to implement any of the following. No stress.
     - Tests are always appreciated. See what you can do here.
     - Host your application. Heroku is free and easy. That being said, use whatever you are comfortable with.
     - Add some other fun features with the Maplibre and Mapbox-draw-gl libraries. Be creative!
