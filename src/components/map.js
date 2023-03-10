@@ -9,7 +9,7 @@ export default function Map(props) {
   const map = useRef(null);
   const [lng] = useState(props.lng || -104.991531);
   const [lat] = useState(props.lat || 39.742043);
-  const [style] = useState('https://devtileserver2.concept3d.com/styles/c3d_default_style/style.json');
+  const [style] = useState('https://devtileserver.concept3d.com/styles/c3d_default_style/style.json');
   const [zoom] = useState(14);
   
   useEffect(() => {
