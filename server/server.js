@@ -29,10 +29,14 @@ const initialLocations = [
   },
 ];
 
+const polygonList = [];
+
 app.locals.idIndex = 3;
 app.locals.locations = initialLocations;
+app.locals.polygons = polygonList;
 
 app.get('/locations', (req, res) => res.send({ locations: initialLocations }));
+app.get('/polygons', (req, res) => res.send({ polygons: polygonList }))
 app.post('/new-locations', (req, res) => {
   const index = app.locals.idIndex + 1;
   const locationObj = req.body;
@@ -50,7 +54,6 @@ app.post('/new-locations', (req, res) => {
     };
     app.locals.idIndex = index;
     app.locals.locations.push(newLocations)
-    console.log(initialLocations)
     res.send({ locations: initialLocations });
   }
   else if (!validateLngAndLat(lng, lat)) {
@@ -60,6 +63,19 @@ app.post('/new-locations', (req, res) => {
     res.status(400).send({ error: "Please enter proper city name, in the format of 'New York'. Watch out for upper cases and spaces." });
   }
 });
+
+app.post('/new-polygons', (req, res) => {
+  console.log(req.body);
+  const feature = req.body.feature;
+  const newPolygon = {
+    id: feature.id,
+    coordinates: feature.geometry.coordinates,
+    type: feature.geometry.type
+  }
+
+  app.locals.polygons.push(newPolygon);
+  res.send({ polygons: polygonList });
+})
 
 app.use(express.static(path.resolve(__dirname, '..', 'build')));
 

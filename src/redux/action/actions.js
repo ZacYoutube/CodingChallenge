@@ -13,3 +13,17 @@ export const setLocations = (locations) => {
         payload: locations
     }
 }
+
+export const addPolygons = (polygonObj) => {
+    return {
+        type: ActionTypes.ADD_POLYGONS,
+        payload: polygonObj
+    }
+}
+
+export const setPolygons = (polygons) => {
+    return {
+        type: ActionTypes.SET_POLYGONS,
+        payload: polygons
+    }
+}
