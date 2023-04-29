@@ -18,6 +18,10 @@ export default function markerReducer(state = initialState, action) {
       return {...state, locations: [...state.locations, payload]};
     case ActionTypes.SET_LOCATIONS:
       return {...state, locations: payload};
+    case ActionTypes.ADD_POLYGONS:
+      return {...state, polygons: [...state.polygons, payload]};
+    case ActionTypes.SET_POLYGONS: 
+      return {...state, polygons: payload};
     default:
       // If this reducer doesn't recognize the action type, or doesn't
       // care about this specific action, return the existing state unchanged

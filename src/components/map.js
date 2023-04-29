@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setLocations, addMarkers } from '../redux/action/actions';
+import { setLocations, addMarkers, setPolygons, addPolygons } from '../redux/action/actions';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './map.css';
@@ -22,6 +22,7 @@ export default function Map(props) {
   const [style] = useState('https://devtileserver.concept3d.com/styles/c3d_default_style/style.json');
   const [zoom] = useState(14);
   const locationList = useSelector((state) => state.markers.locations)
+  const polygons = useSelector((state) => state.markers.polygons)
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -38,7 +39,8 @@ export default function Map(props) {
         polygon: true,
         trash: true,
         point: true
-      }
+      },
+      defaultMode: 'draw_polygon'
     });
     map.current.addControl(draw, 'top-left');
     map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
@@ -49,7 +51,28 @@ export default function Map(props) {
 
     function newDraw(e) {
       const data = draw.getAll();
-      console.log("data:", data);
+      console.log(data);
+      const actionType = e.type;
+      const dataType = e.features[0].geometry.type;
+      console.log(dataType)
+      if (actionType == 'draw.create') {
+        if (dataType == 'Point' && data.features.length > 0) {
+          const features = data.features[data.features.length - 1];
+          const location = features.geometry.coordinates;
+          const lng = location[0];
+          const lat = location[1];
+          setLng(lng);
+          setLat(lat);
+          toggleModal()
+        }
+        else if(dataType == 'Polygon' && data.features.length > 0) {
+          for(const feature of data.features) {
+            addPolygon(feature);
+          }
+        }
+
+      }
+
     }
 
     return () => {
@@ -59,7 +82,7 @@ export default function Map(props) {
 
   useEffect(() => {
     // step 1 of the task: Load the original three locations from the server and display the markers
-    function fetchInitialLocations() {
+    function fetchLocations() {
       // use the predefined get location api
       axios.get("http://localhost:3001/locations")
         .then((response) => {
@@ -68,19 +91,28 @@ export default function Map(props) {
         })
     }
 
-    fetchInitialLocations()
+    function fetchInitialPolygons() {
+      axios.get("http://localhost:3001/polygons")
+        .then((response) => {
+          const data = response.data;
+          dispatch(setPolygons(data.polygons));
+        })
+    }
 
-  }, []);  
+    fetchLocations()
+    fetchInitialPolygons()
+
+  }, []);
 
   useEffect(() => {
-    for(const location of locationList) {
+    for (const location of locationList) {
       new maplibregl.Marker()
         .setLngLat([location.lng, location.lat])
         .addTo(map.current);
     }
   }, [locationList]);
 
-
+  console.log(polygons);
   function toggleModal() {
     setOpen(!openModal);
     setErroMsg("");
@@ -123,6 +155,19 @@ export default function Map(props) {
       });
   }
 
+  function addPolygon(feature) {
+    axios.post('http://localhost:3001/new-polygons', { feature: feature })
+      .then((_) => {
+        dispatch(addPolygons({
+          id: feature.id,
+          coordinates: feature.geometry.coordinates,
+          type: feature.geometry.type
+        }))
+      }, (error) => {
+        console.log(error);
+      })
+  }
+
   return (
     <div className="map-wrap">
       <a href="https://www.maptiler.com" className="watermark"><img
@@ -134,15 +179,15 @@ export default function Map(props) {
         <Modal.Body className="modal-body">
           <label>
             Location Name:
-            <input type="text" name="name" onChange={(e) => { inputFieldOnChange(e, 0) }} />
+            <input type="text" name="name" value={newLocationName} onChange={(e) => { inputFieldOnChange(e, 0) }} />
           </label>
           <label>
             Location Longitude:
-            <input type="number" name="lng" onChange={(e) => { inputFieldOnChange(e, 1) }} />
+            <input type="number" name="lng" value={newLocationLng} onChange={(e) => { inputFieldOnChange(e, 1) }} />
           </label>
           <label>
             Location Latitude:
-            <input type="number" name="lat" onChange={(e) => { inputFieldOnChange(e, 2) }} />
+            <input type="number" name="lat" value={newLocationLat} onChange={(e) => { inputFieldOnChange(e, 2) }} />
           </label>
         </Modal.Body>
         <div className="error-message">{errorMsg}</div>
