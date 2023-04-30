@@ -65,12 +65,11 @@ export default function Map(props) {
           setLat(lat);
           toggleModal()
         }
-        else if(dataType == 'Polygon' && data.features.length > 0) {
-          for(const feature of data.features) {
+        else if (dataType == 'Polygon' && data.features.length > 0) {
+          for (const feature of data.features) {
             addPolygon(feature);
           }
         }
-
       }
 
     }
@@ -105,12 +104,41 @@ export default function Map(props) {
   }, []);
 
   useEffect(() => {
+
     for (const location of locationList) {
       new maplibregl.Marker()
         .setLngLat([location.lng, location.lat])
         .addTo(map.current);
     }
-  }, [locationList]);
+
+    for (const polygon of polygons) {
+      const layer = {
+        id: 'polygon-layer' + Math.floor(Math.random() * 1000),
+        type: 'fill',
+        source: {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            geometry: {
+              type: polygon.type,
+              coordinates: polygon.coordinates
+            }
+          }
+        },
+        layout: {},
+        paint: {
+          'fill-color': '#ff0000',
+          'fill-opacity': 0.5
+        }
+      }
+      map.current.on('load', () => {
+        map.current.addLayer(layer);
+      });
+    }
+
+
+
+  }, [locationList, polygons]);
 
   console.log(polygons);
   function toggleModal() {
