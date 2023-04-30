@@ -6,3 +6,13 @@ export const ActionTypes = {
     DELETE_POLYGON: "DELETE_POLYGON",
     DELETE_MARKER: "DELETE_MARKER"
 } 
+
+export const Endpoints = {
+    HEROKU_URL: 'https://maplibregl-exercise.herokuapp.com',
+    LOCALHOST_URL: 'http://localhost:3001'
+}
+
+export const EnvStatus = {
+    DEV: 'development',
+    PROD: 'production'
+}

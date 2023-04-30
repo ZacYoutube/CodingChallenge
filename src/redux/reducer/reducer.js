@@ -9,7 +9,7 @@ const initialState = {
 }
 
 // Use the initialState as a default value
-export default function markerReducer(state = initialState, action) {
+export function markerReducer(state = initialState, action) {
   const { type, payload } = action
   // The reducer normally looks at the action type field to decide what happens
   switch (type) {
@@ -21,6 +21,17 @@ export default function markerReducer(state = initialState, action) {
     case ActionTypes.DELETE_MARKER:
       const updatedLocations = state.locations.filter(location => location.id !== payload);
       return { ...state, locations: updatedLocations }; 
+    default:
+      // If this reducer doesn't recognize the action type, or doesn't
+      // care about this specific action, return the existing state unchanged
+      return state
+  }
+}
+
+
+export function polygonReducer(state = initialState, action) {
+  const { type, payload } = action
+  switch (type) {
     case ActionTypes.ADD_POLYGONS:
       return {...state, polygons: [...state.polygons, payload]};
     case ActionTypes.SET_POLYGONS: 
@@ -29,8 +40,6 @@ export default function markerReducer(state = initialState, action) {
       const updatedPolygons = state.polygons.filter(polygon => polygon.id !== payload);
       return { ...state, polygons: updatedPolygons };
     default:
-      // If this reducer doesn't recognize the action type, or doesn't
-      // care about this specific action, return the existing state unchanged
       return state
   }
 }

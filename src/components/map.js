@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setLocations, addMarkers, setPolygons, addPolygons, deletePolygon, deleteMarker } from '../redux/action/actions';
+import { fetchLocationsAction, fetchPolygonsAction, addMarkerAction, removeMarkerAction, addPolygonAction, removePolygonAction } from '../redux/action/actions';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './map.css';
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Modal from 'react-bootstrap/Modal';
-import axios from 'axios';
+import ModalPopup from './modal';
 
 export default function Map(props) {
   const mapContainerRef = useRef();
@@ -21,13 +20,34 @@ export default function Map(props) {
   const [lat] = useState(props.lat || 39.742043);
   const [style] = useState('https://devtileserver.concept3d.com/styles/c3d_default_style/style.json');
   const [zoom] = useState(14);
-  const locationList = useSelector((state) => state.markers.locations)
-  const polygons = useSelector((state) => state.markers.polygons)
+  const locationList = useSelector((state) => state.markerReducer.locations)
+  const polygons = useSelector((state) => state.polygonReducer.polygons)
   const dispatch = useDispatch();
-  const API_URL = 'https://maplibregl-exercise.herokuapp.com/';
+  const formData = [
+    {
+      displayName: "Location Name:",
+      type: "text",
+      placeholder: "Enter a valid location",
+      value: newLocationName,
+      onChange: inputFieldOnChange
+    },
+    {
+      displayName: "Location Longitude:",
+      type: "number",
+      placeholder: "Enter a valid longitude",
+      value: newLocationLng,
+      onChange: inputFieldOnChange
+    },
+    {
+      displayName: "Location Latitude:",
+      type: "number",
+      placeholder: "Enter a valid latitude",
+      value: newLocationLat,
+      onChange: inputFieldOnChange
+    }
+  ]
 
   useEffect(() => {
-    console.log(process.env.NODE_ENV)
     if (map.current) return;
     map.current = new maplibregl.Map({
       container: mapContainerRef.current,
@@ -56,6 +76,8 @@ export default function Map(props) {
       const actionType = e.type;
       const dataType = e.features[0].geometry.type;
       if (actionType === 'draw.create') {
+        // when user pins the point on map, also let user add marker on that point 
+        // (not sure if thats whats asked, but keep this in case along with the add marker button)
         if (dataType === 'Point' && data.features.length > 0) {
           const features = data.features[data.features.length - 1];
           const location = features.geometry.coordinates;
@@ -66,12 +88,14 @@ export default function Map(props) {
           toggleModal()
         }
         else if (dataType === 'Polygon' && data.features.length > 0) {
+          // if user creates/drew polygons, save the polygons
           for (const feature of data.features) {
             addPolygon(feature);
           }
         }
       }
       if (actionType === 'draw.delete') {
+        // allows polygon deletion
         if (dataType === 'Polygon') {
           const polygonId = e.features[0].id;
           removePolygon(polygonId);
@@ -112,34 +136,14 @@ export default function Map(props) {
   }, []);
 
   useEffect(() => {
-    // step 1 of the task: Load the original three locations from the server and display the markers
-    function fetchLocations() {
-      // use the predefined get location api
-      axios.get(`${API_URL}/locations`)
-        .then((response) => {
-          const data = response.data;
-          // update the state from redux
-          dispatch(setLocations(data.locations))
-        })
-    }
 
-    // fetch the saved polygons from backend
-    function fetchInitialPolygons() {
-      axios.get(`${API_URL}/polygons`)
-        .then((response) => {
-          const data = response.data;
-          // update the state from redux
-          dispatch(setPolygons(data.polygons));
-        })
-    }
-
-    fetchLocations()
-    fetchInitialPolygons()
+    dispatch(fetchLocationsAction());
+    dispatch(fetchPolygonsAction());
 
   }, []);
 
   useEffect(() => {
-    // for loop for adding markers from redux state to the map
+    // forEach loop for adding markers from redux state to the map
     locationList.forEach((location, index) => {
       var popup = new maplibregl.Popup()
         .setHTML(`<div><div id="popup-title">${location.name}</div><div><button id="marker-button-${index}">Delete</button></div></div>`);
@@ -163,8 +167,8 @@ export default function Map(props) {
 
     });
 
-    // for loop for adding polygons from redux state to the map
-    for (const polygon of polygons) {
+    // forEach loop for adding polygons from redux state to the map
+    polygons.forEach((polygon, _) => {
       const layer = {
         id: polygon.id,
         type: 'fill',
@@ -183,15 +187,25 @@ export default function Map(props) {
           'fill-opacity': 0.5
         }
       }
+
       map.current.on('load', () => {
         map.current.addLayer(layer);
       });
-    }
+    });
+
   }, [locationList, polygons]);
 
+  // for toggling modal component
   function toggleModal() {
     setOpen(!openModal);
     setErroMsg("");
+  }
+
+  // emptying the input fields
+  function resetInputs() {
+    setName(null);
+    setLng(null);
+    setLat(null);
   }
 
   function inputFieldOnChange(e, index) {
@@ -208,93 +222,54 @@ export default function Map(props) {
 
   // step2 of the task, post request to send the new location data to the server
   function addMarker() {
-    axios.post(`${API_URL}/new-locations`, {
-      name: newLocationName,
-      lng: newLocationLng,
-      lat: newLocationLat
-    })
+    dispatch(addMarkerAction(newLocationName, newLocationLng, newLocationLat, locationList))
       .then((_) => {
         // if succeed, center a marker in the map and close the modal
         map.current.setCenter([newLocationLng, newLocationLat]);
         setOpen(false);
         setErroMsg("");
-        // if succeed, dispatch to update state locations
-        dispatch(addMarkers({
-          id: `id${locationList.length + 1}`,
-          name: newLocationName,
-          lng: Number(newLocationLng),
-          lat: Number(newLocationLat)
-        }))
+        resetInputs();
       }, (error) => {
         // display custom error messages on the modal
         const errorMessage = error.response.data.error;
         setErroMsg(errorMessage);
+        resetInputs()
       });
   }
 
   function removeMarker(markerId) {
-    axios.delete(`${API_URL}/delete-marker/${markerId}`)
-      .then((_) => {
-        // if succeed, dispatch to update state locations
-        dispatch(deleteMarker(markerId));
-      }, (error) => {
-        console.log(error);
-      })
+    dispatch(removeMarkerAction(markerId));
   }
 
   function addPolygon(feature) {
-    axios.post(`${API_URL}/new-polygons`, { feature: feature })
-      .then((_) => {
-        // if succeed, dispatch to update state polygons
-        dispatch(addPolygons({
-          id: feature.id,
-          coordinates: feature.geometry.coordinates,
-          type: feature.geometry.type
-        }))
-      }, (error) => {
-        console.log(error);
-      })
+    dispatch(addPolygonAction(feature));
   }
 
   function removePolygon(polygonId) {
-    axios.delete(`${API_URL}/delete-polygon/${polygonId}`)
-      .then((_) => {
-        // if succeed, dispatch to update state polygons
-        dispatch(deletePolygon(polygonId));
-      }, (error) => {
-        console.log(error);
-      })
+    dispatch(removePolygonAction(polygonId))
   }
 
   return (
     <div className="map-wrap">
       <a href="https://www.maptiler.com" className="watermark"><img
         src="https://api.maptiler.com/resources/logo.svg" alt="MapTiler logo" /></a>
-      <Modal show={openModal} onHide={toggleModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Add Marker</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="modal-body">
-          <label>
-            Location Name:
-            <input type="text" name="name" value={newLocationName} onChange={(e) => { inputFieldOnChange(e, 0) }} />
-          </label>
-          <label>
-            Location Longitude:
-            <input type="number" name="lng" value={newLocationLng} onChange={(e) => { inputFieldOnChange(e, 1) }} />
-          </label>
-          <label>
-            Location Latitude:
-            <input type="number" name="lat" value={newLocationLat} onChange={(e) => { inputFieldOnChange(e, 2) }} />
-          </label>
-        </Modal.Body>
-        <div className="error-message">{errorMsg}</div>
-        <Modal.Footer>
-          <button id="submit-btn" onClick={addMarker} disabled={newLocationName == null || newLocationLng == null || newLocationLat == null}>Add</button>
-        </Modal.Footer>
-      </Modal>
+
+      <ModalPopup
+        data={formData}
+        error={errorMsg}
+        onSubmit={addMarker}
+        isOpen={openModal}
+        toggle={toggleModal}
+      />
+
       <button id="add-marker-btn" onClick={toggleModal}>Add Marker</button>
+
       <div ref={mapContainerRef} className="map" />
     </div>
   );
 }
+
+
+
+
+
