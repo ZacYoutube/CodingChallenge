@@ -49,6 +49,24 @@
   padding: 6px .6em;
 }
 
+#submit-btn:disabled {
+  background-color: gainsboro;
+  color: gray;
+  cursor: not-allowed;
+  border: none;
+}
+
+#delete-polygon-button, button[id^="marker-button-"] {
+  background: none;
+  border: none;
+  color: blue;
+  margin-top: 10px;
+}
+
+#popup-title {
+  margin-top: 10px;
+}
+
 .modal-body label {
   display: block;
   text-align: left;
