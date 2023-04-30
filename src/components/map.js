@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { setLocations, addMarkers, setPolygons, addPolygons } from '../redux/action/actions';
+import { setLocations, addMarkers, setPolygons, addPolygons, deletePolygon, deleteMarker } from '../redux/action/actions';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './map.css';
@@ -13,7 +13,7 @@ export default function Map(props) {
   const mapContainerRef = useRef();
   const map = useRef(null);
   const [openModal, setOpen] = useState(false);
-  const [newLocationName, setName] = useState("");
+  const [newLocationName, setName] = useState(null);
   const [newLocationLng, setLng] = useState(null);
   const [newLocationLat, setLat] = useState(null);
   const [errorMsg, setErroMsg] = useState("");
@@ -31,7 +31,7 @@ export default function Map(props) {
       container: mapContainerRef.current,
       style,
       center: [lng, lat],
-      zoom
+      zoom,
     });
     const draw = new MapboxDraw({
       displayControlsDefault: false,
@@ -51,12 +51,10 @@ export default function Map(props) {
 
     function newDraw(e) {
       const data = draw.getAll();
-      console.log(data);
       const actionType = e.type;
       const dataType = e.features[0].geometry.type;
-      console.log(dataType)
-      if (actionType == 'draw.create') {
-        if (dataType == 'Point' && data.features.length > 0) {
+      if (actionType === 'draw.create') {
+        if (dataType === 'Point' && data.features.length > 0) {
           const features = data.features[data.features.length - 1];
           const location = features.geometry.coordinates;
           const lng = location[0];
@@ -65,14 +63,46 @@ export default function Map(props) {
           setLat(lat);
           toggleModal()
         }
-        else if (dataType == 'Polygon' && data.features.length > 0) {
+        else if (dataType === 'Polygon' && data.features.length > 0) {
           for (const feature of data.features) {
             addPolygon(feature);
           }
         }
       }
+      if (actionType === 'draw.delete') {
+        if (dataType === 'Polygon') {
+          const polygonId = e.features[0].id;
+          removePolygon(polygonId);
+        }
+      }
 
     }
+
+    // Attach a click event listener to the map
+    map.current.on('click', function (e) {
+      // Get the clicked features
+      var features = map.current.queryRenderedFeatures(e.point);
+      // Find the clicked polygon feature - in my case, the polygons drew has same layer id and source id
+      var polygons = features.filter(function (feature) {
+        return feature.layer.id === feature.layer.source;
+      });
+      // If a polygon feature was clicked - display popup for allowing deletion
+      if (polygons.length > 0) {
+        var popup = new maplibregl.Popup()
+          .setLngLat(e.lngLat)
+          .setHTML('<button id="delete-polygon-button">Delete</button>')
+          .addTo(map.current);
+        popup.getElement().querySelector("#delete-polygon-button").addEventListener('click', function () {
+          const id = polygons[0].layer.id;
+          removePolygon(id);
+          if (map.current.getLayer(id)) {
+            map.current.removeLayer(id);
+          }
+          popup.remove();
+        });
+      }
+    });
+
 
     return () => {
       map.current.remove();
@@ -86,14 +116,17 @@ export default function Map(props) {
       axios.get("http://localhost:3001/locations")
         .then((response) => {
           const data = response.data;
+          // update the state from redux
           dispatch(setLocations(data.locations))
         })
     }
 
+    // fetch the saved polygons from backend
     function fetchInitialPolygons() {
       axios.get("http://localhost:3001/polygons")
         .then((response) => {
           const data = response.data;
+          // update the state from redux
           dispatch(setPolygons(data.polygons));
         })
     }
@@ -104,16 +137,34 @@ export default function Map(props) {
   }, []);
 
   useEffect(() => {
+    // for loop for adding markers from redux state to the map
+    locationList.forEach((location, index) => {
+      var popup = new maplibregl.Popup()
+        .setHTML(`<div><div id="popup-title">${location.name}</div><div><button id="marker-button-${index}">Delete</button></div></div>`);
 
-    for (const location of locationList) {
-      new maplibregl.Marker()
+      var marker = new maplibregl.Marker()
         .setLngLat([location.lng, location.lat])
+        .setPopup(popup)
         .addTo(map.current);
-    }
 
+      const handleDeleteClick = () => {
+        marker.remove();
+        popup.remove();
+        removeMarker(location.id);
+      }
+
+      // add popup for allowing deletion
+      popup.on('open', () => {
+        const deleteButton = document.getElementById(`marker-button-${index}`);
+        deleteButton.addEventListener('click', handleDeleteClick);
+      });
+
+    });
+
+    // for loop for adding polygons from redux state to the map
     for (const polygon of polygons) {
       const layer = {
-        id: 'polygon-layer' + Math.floor(Math.random() * 1000),
+        id: polygon.id,
         type: 'fill',
         source: {
           type: 'geojson',
@@ -125,9 +176,8 @@ export default function Map(props) {
             }
           }
         },
-        layout: {},
         paint: {
-          'fill-color': '#ff0000',
+          'fill-color': '#40b1ce',
           'fill-opacity': 0.5
         }
       }
@@ -135,12 +185,8 @@ export default function Map(props) {
         map.current.addLayer(layer);
       });
     }
-
-
-
   }, [locationList, polygons]);
 
-  console.log(polygons);
   function toggleModal() {
     setOpen(!openModal);
     setErroMsg("");
@@ -170,6 +216,7 @@ export default function Map(props) {
         map.current.setCenter([newLocationLng, newLocationLat]);
         setOpen(false);
         setErroMsg("");
+        // if succeed, dispatch to update state locations
         dispatch(addMarkers({
           id: `id${locationList.length + 1}`,
           name: newLocationName,
@@ -183,14 +230,35 @@ export default function Map(props) {
       });
   }
 
+  function removeMarker(markerId) {
+    axios.delete(`http://localhost:3001/delete-marker/${markerId}`)
+      .then((_) => {
+        // if succeed, dispatch to update state locations
+        dispatch(deleteMarker(markerId));
+      }, (error) => {
+        console.log(error);
+      })
+  }
+
   function addPolygon(feature) {
     axios.post('http://localhost:3001/new-polygons', { feature: feature })
       .then((_) => {
+        // if succeed, dispatch to update state polygons
         dispatch(addPolygons({
           id: feature.id,
           coordinates: feature.geometry.coordinates,
           type: feature.geometry.type
         }))
+      }, (error) => {
+        console.log(error);
+      })
+  }
+
+  function removePolygon(polygonId) {
+    axios.delete(`http://localhost:3001/delete-polygon/${polygonId}`)
+      .then((_) => {
+        // if succeed, dispatch to update state polygons
+        dispatch(deletePolygon(polygonId));
       }, (error) => {
         console.log(error);
       })
@@ -220,7 +288,7 @@ export default function Map(props) {
         </Modal.Body>
         <div className="error-message">{errorMsg}</div>
         <Modal.Footer>
-          <button id="submit-btn" onClick={addMarker}>Add</button>
+          <button id="submit-btn" onClick={addMarker} disabled={newLocationName == null || newLocationLng == null || newLocationLat == null}>Add</button>
         </Modal.Footer>
       </Modal>
       <button id="add-marker-btn" onClick={toggleModal}>Add Marker</button>

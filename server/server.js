@@ -65,7 +65,6 @@ app.post('/new-locations', (req, res) => {
 });
 
 app.post('/new-polygons', (req, res) => {
-  console.log(req.body);
   const feature = req.body.feature;
   const newPolygon = {
     id: feature.id,
@@ -75,6 +74,20 @@ app.post('/new-polygons', (req, res) => {
 
   app.locals.polygons.push(newPolygon);
   res.send({ polygons: polygonList });
+})
+
+app.delete('/delete-polygon/:id', (req, res) => {
+  const polygonIndex = app.locals.polygons.findIndex(({ id }) => id === req.params.id);
+  if (polygonIndex >= 0) {
+    app.locals.polygons.splice(polygonIndex, 1);
+  }
+})
+
+app.delete('/delete-marker/:id', (req, res) => {
+  const markerIndex = app.locals.locations.findIndex(({ id }) => id === req.params.id);
+  if (markerIndex >= 0) {
+    app.locals.locations.splice(markerIndex, 1);
+  }
 })
 
 app.use(express.static(path.resolve(__dirname, '..', 'build')));

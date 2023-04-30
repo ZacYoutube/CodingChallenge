@@ -21,9 +21,23 @@ export const addPolygons = (polygonObj) => {
     }
 }
 
+export const deleteMarker = (id) => {
+    return {
+        type: ActionTypes.DELETE_MARKER,
+        payload: id
+    }
+}
+
 export const setPolygons = (polygons) => {
     return {
         type: ActionTypes.SET_POLYGONS,
         payload: polygons
+    }
+}
+
+export const deletePolygon = (id) => {
+    return {
+        type: ActionTypes.DELETE_POLYGON,
+        payload: id
     }
 }
