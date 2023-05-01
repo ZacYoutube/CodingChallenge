@@ -153,16 +153,14 @@ export default function Map(props) {
         .setPopup(popup)
         .addTo(map.current);
 
-      const handleDeleteClick = () => {
-        marker.remove();
-        popup.remove();
-        removeMarker(location.id);
-      }
-
       // add popup for allowing deletion
       popup.on('open', () => {
         const deleteButton = document.getElementById(`marker-button-${index}`);
-        deleteButton.addEventListener('click', handleDeleteClick);
+        deleteButton.addEventListener('click', function() {
+          marker.remove();
+          popup.remove();
+          removeMarker(location.id);
+        });
       });
 
     });
@@ -199,13 +197,6 @@ export default function Map(props) {
   function toggleModal() {
     setOpen(!openModal);
     setErroMsg("");
-  }
-
-  // emptying the input fields
-  function resetInputs() {
-    setName(null);
-    setLng(null);
-    setLat(null);
   }
 
   // emptying the input fields

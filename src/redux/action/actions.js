@@ -47,7 +47,7 @@ export const deletePolygon = (id) => {
 
 export function fetchLocationsAction() {
     // use the predefined get location api
-    return dispatch => {
+    return async dispatch => {
         return axios.get(`${API_URL}/locations`)
             .then((response) => {
                 const data = response.data;
@@ -64,7 +64,7 @@ export function fetchLocationsAction() {
 
 
 export function fetchPolygonsAction() {
-    return dispatch => {
+    return async dispatch => {
         return axios.get(`${API_URL}/polygons`)
             .then((response) => {
                 const data = response.data;
@@ -80,7 +80,7 @@ export function fetchPolygonsAction() {
 }
 
 export function addMarkerAction(newLocationName, newLocationLng, newLocationLat, locationList) {
-    return dispatch => {
+    return async dispatch => {
         return axios.post(`${API_URL}/new-locations`, {
             name: newLocationName,
             lng: newLocationLng,
@@ -104,7 +104,7 @@ export function addMarkerAction(newLocationName, newLocationLng, newLocationLat,
 }
 
 export function removeMarkerAction(markerId) {
-    return dispatch => {
+    return async dispatch => {
         return axios.delete(`${API_URL}/delete-marker/${markerId}`)
             .then((_) => {
                 // if succeed, dispatch to update state locations
@@ -119,7 +119,7 @@ export function removeMarkerAction(markerId) {
 
 
 export function addPolygonAction(feature) {
-    return dispatch => {
+    return async dispatch => {
         return axios.post(`${API_URL}/new-polygons`, { feature: feature })
             .then((_) => {
                 // if succeed, dispatch to update state polygons
@@ -137,7 +137,7 @@ export function addPolygonAction(feature) {
 }
 
 export function removePolygonAction(polygonId) {
-    return dispatch => {
+    return async dispatch => {
         return axios.delete(`${API_URL}/delete-polygon/${polygonId}`)
             .then((_) => {
                 // if succeed, dispatch to update state polygons
