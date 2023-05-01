@@ -70,7 +70,7 @@ app.post('/new-locations', async (req, res) => {
   else if (!isLocationValid) {
     res.status(400).send({ error: "Please enter proper city name." });
   }
-  else if (!isLngLatValid) {
+  else {
     res.status(400).send({ error: "Please enter valid longitude and latitude. Note that a valid longitude is between -180 and 180, and a valid latitude is between -90 and 90." });
   }
 });

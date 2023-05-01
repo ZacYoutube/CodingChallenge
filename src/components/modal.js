@@ -5,7 +5,7 @@ import './map.css';
 
 export default function ModalPopup({ data, error, onSubmit, isOpen, toggle }) {
     const [dataFilled, setFilled] = useState(true);
-
+    
     useEffect(() => {
         const isFilled = data.every((elem) => elem.value != null);
         setFilled(isFilled);

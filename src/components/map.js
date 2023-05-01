@@ -23,7 +23,6 @@ export default function Map(props) {
   const locationList = useSelector((state) => state.markerReducer.locations)
   const polygons = useSelector((state) => state.polygonReducer.polygons)
   const dispatch = useDispatch();
-<<<<<<< HEAD
   const formData = [
     {
       displayName: "Location Name:",
@@ -47,10 +46,7 @@ export default function Map(props) {
       onChange: inputFieldOnChange
     }
   ]
-
-=======
-  const API_URL = process.env.NODE_ENV === 'production' ? 'https://maplibregl-exercise.herokuapp.com' : 'http://localhost:3001';
->>>>>>> 0bbc442 (fixed an issue and deployment to heroku.)
+  
   useEffect(() => {
     if (map.current) return;
     map.current = new maplibregl.Map({
@@ -140,36 +136,9 @@ export default function Map(props) {
   }, []);
 
   useEffect(() => {
-<<<<<<< HEAD
-
+    // fetch the locations and polygons
     dispatch(fetchLocationsAction());
     dispatch(fetchPolygonsAction());
-=======
-    // step 1 of the task: Load the original three locations from the server and display the markers
-    function fetchLocations() {
-      // use the predefined get location api
-      axios.get(`${API_URL}/locations`)
-        .then((response) => {
-          const data = response.data;
-          console.log("data", data);
-          // update the state from redux
-          dispatch(setLocations(data.locations))
-        })
-    }
-
-    // fetch the saved polygons from backend
-    function fetchPolygons() {
-      axios.get(`${API_URL}/polygons`)
-        .then((response) => {
-          const data = response.data;
-          // update the state from redux
-          dispatch(setPolygons(data.polygons));
-        })
-    }
-
-    fetchLocations()
-    fetchPolygons()
->>>>>>> 0bbc442 (fixed an issue and deployment to heroku.)
 
   }, []);
 
@@ -232,6 +201,7 @@ export default function Map(props) {
     setErroMsg("");
   }
 
+  // emptying the input fields
   function resetInputs() {
     setName(null);
     setLng(null);
@@ -266,16 +236,6 @@ export default function Map(props) {
         setOpen(false);
         setErroMsg("");
         resetInputs();
-<<<<<<< HEAD
-=======
-        // if succeed, dispatch to update state locations
-        dispatch(addMarkers({
-          id: `id${locationList.length + 1}`,
-          name: newLocationName,
-          lng: Number(newLocationLng),
-          lat: Number(newLocationLat)
-        }))
->>>>>>> 0bbc442 (fixed an issue and deployment to heroku.)
       }, (error) => {
         // display custom error messages on the modal
         const errorMessage = error.response.data.error;
@@ -294,16 +254,6 @@ export default function Map(props) {
 
   function removePolygon(polygonId) {
     dispatch(removePolygonAction(polygonId))
-  }
-
-  function removePolygon(polygonId) {
-    axios.delete(`${API_URL}/delete-polygon/${polygonId}`)
-      .then((_) => {
-        // if succeed, dispatch to update state polygons
-        dispatch(deletePolygon(polygonId));
-      }, (error) => {
-        console.log(error);
-      })
   }
 
   return (
